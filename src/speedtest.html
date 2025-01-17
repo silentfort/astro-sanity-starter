@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Internet Speed Tester</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      color: #333;
+    }
+    .result {
+      font-size: 1.5em;
+      margin-top: 20px;
+    }
+    .button {
+      background-color: #28a745;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1em;
+    }
+    .button:disabled {
+      background-color: #6c757d;
+    }
+  </style>
+</head>
+<body>
+  <h1>Internet Speed Tester</h1>
+  <p>Click the button below to measure your internet speed:</p>
+  <button class="button" id="startTest">Start Test</button>
+  <div class="result" id="result">
+    <p>Download Speed: <span id="downloadSpeed">-</span> Mbps</p>
+    <p>Upload Speed: <span id="uploadSpeed">-</span> Mbps</p>
+    <p>Ping: <span id="ping">-</span> ms</p>
+  </div>
+
+  <script>
+    async function measureSpeed() {
+      const testServer = 'https://speedtest.your-server.com'; // Replace with your server if needed
+      const downloadSize = 10 * 1024 * 1024; // 10 MB
+      const downloadFile = `${testServer}/testfile.bin`;
+
+      const startTest = document.getElementById('startTest');
+      const downloadSpeedElement = document.getElementById('downloadSpeed');
+      const uploadSpeedElement = document.getElementById('uploadSpeed');
+      const pingElement = document.getElementById('ping');
+
+      function calculateSpeed(time, size) {
+        const speed = (size * 8) / (time / 1000) / (1024 * 1024); // Convert to Mbps
+        return speed.toFixed(2);
+      }
+
+      async function measureDownloadSpeed() {
+        const startTime = performance.now();
+        const response = await fetch(downloadFile);
+        const endTime = performance.now();
+        const timeTaken = endTime - startTime;
+        const dataSize = downloadSize;
+        return calculateSpeed(timeTaken, dataSize);
+      }
+
+      async function measurePing() {
+        const startTime = performance.now();
+        await fetch(testServer);
+        const endTime = performance.now();
+        return (endTime - startTime).toFixed(2);
+      }
+
+      startTest.disabled = true;
+
+      try {
+        const downloadSpeed = await measureDownloadSpeed();
+        const ping = await measurePing();
+
+        downloadSpeedElement.textContent = downloadSpeed;
+        pingElement.textContent = ping;
+
+        // Placeholder for upload speed
+        uploadSpeedElement.textContent = 'N/A (Feature Coming Soon)';
+      } catch (error) {
+        alert('An error occurred during the test.');
+        console.error(error);
+      }
+
+      startTest.disabled = false;
+    }
+
+    document.getElementById('startTest').addEventListener('click', measureSpeed);
+  </script>
+</body>
+</html>
